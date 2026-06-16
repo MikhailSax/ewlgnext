@@ -70,7 +70,7 @@ export default function Footer() {
                   EWLGlog@yandex.com
                 </a>
               </li>
-              <li className="pt-2 text-cream/40">Москва · Минск · Almaty · Дубай</li>
+              <li className="pt-2 text-cream/40">Москва · Минск · Алматы · Дубай</li>
             </ul>
           </div>
         </div>
