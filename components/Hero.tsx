@@ -92,7 +92,7 @@ export default function Hero() {
             </Link>
             <Link
               href="#modes"
-              className="inline-flex items-center justify-between sm:justify-start gap-2 px-6 py-4 sm:px-7 sm:py-4 text-ink border border-ink/15 hover:border-ink hover:bg-ink hover:text-cream transition-all duration-300"
+              className="inline-flex items-center justify-between sm:justify-start gap-2 px-6 py-4 sm:px-7 sm:py-4 text-ink border border-ink/15 hover:bg-brand-500 hover:bg-ink hover:text-cream transition-all duration-300"
             >
               <span>Способы доставки</span>
               <span className="opacity-50">→</span>
