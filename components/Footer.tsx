@@ -9,14 +9,7 @@ export default function Footer() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-12 gap-8 md:gap-10">
           <div className="lg:col-span-5">
             <Link href="/" className="inline-block mb-5 group">
-              <Image
-                src="/logo.png"
-                alt="EWLG · Логистическая компания"
-                width={200}
-                height={200}
-                className="h-24 md:h-28 w-auto object-contain"
-                style={{ filter: 'brightness(0) invert(1)' }}
-              />
+              EWLG
             </Link>
             <p className="text-cream/60 max-w-sm leading-relaxed text-sm sm:text-base">
               Международная мультимодальная логистика.
