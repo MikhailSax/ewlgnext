@@ -50,12 +50,12 @@ export default function Routes() {
                         </div>
                         <h2 className="font-display text-4xl sm:text-5xl md:text-6xl text-ink leading-[1.02] tracking-tightest">
                             Пять стран.<br/>
-                            <span className="italic text-brand-500">Один оператор.</span>
+                            <span className="italic text-brand-500">Одна команда.</span>
                         </h2>
                     </ScrollReveal>
                     <ScrollReveal delay={200} className="lg:col-span-6 lg:col-start-7 self-end">
                         <p className="text-base sm:text-lg text-graphite leading-relaxed">
-                            Главное направление закупок — Китай, доставка в Россию, страны
+                            Главное направление закупок - Китай, доставка в Россию, страны
                             СНГ, Европу и ОАЭ. Работаем там, где знаем каждого таможенного
                             брокера, узловой склад и особенность маршрута.
                         </p>

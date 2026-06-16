@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
 
-// Path to local storage. In production swap for DB / email / Telegram bot.
-const DATA_DIR = path.join(process.cwd(), "data");
-const DATA_FILE = path.join(DATA_DIR, "applications.json");
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 type Application = {
   id: string;
@@ -14,18 +11,73 @@ type Application = {
   createdAt: string;
 };
 
-async function readAll(): Promise<Application[]> {
+/**
+ * Пересылает заявку Telegram-боту EWLG (он сохранит её в БД и уведомит менеджеров).
+ * Настраивается через переменные окружения:
+ *   BOT_ENDPOINT_URL — адрес эндпоинта бота, например https://bot.ewlg.ru/api/application
+ *   BOT_API_KEY      — тот же ключ, что WEB_API_KEY у бота
+ *
+ * Запасной вариант (если бот не настроен) — отправка напрямую в Telegram-чат:
+ *   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+ */
+async function forwardToBot(app: Application): Promise<boolean> {
+  const url = process.env.BOT_ENDPOINT_URL;
+  if (!url) return false;
   try {
-    const raw = await fs.readFile(DATA_FILE, "utf-8");
-    return JSON.parse(raw) as Application[];
-  } catch {
-    return [];
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(process.env.BOT_API_KEY ? { "X-API-Key": process.env.BOT_API_KEY } : {}),
+      },
+      body: JSON.stringify({
+        name: app.name,
+        phone: app.phone,
+        comment: app.comment,
+      }),
+    });
+    if (!res.ok) {
+      console.error("Bot endpoint error:", res.status, await res.text());
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error("Bot endpoint request failed:", e);
+    return false;
   }
 }
 
-async function writeAll(items: Application[]) {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(DATA_FILE, JSON.stringify(items, null, 2), "utf-8");
+async function sendToTelegramDirect(app: Application): Promise<boolean> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return false;
+
+  const esc = (s: string) => s.replace(/([_*`\[\]])/g, "\\$1");
+  const lines = [
+    "🟢 *Новая заявка с сайта EWLG*",
+    "",
+    `👤 *Имя:* ${esc(app.name)}`,
+    `📞 *Телефон:* ${esc(app.phone)}`,
+  ];
+  if (app.comment) lines.push(`💬 *Комментарий:* ${esc(app.comment)}`);
+  lines.push("", `🕒 ${new Date(app.createdAt).toLocaleString("ru-RU")}`);
+
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: lines.join("\n"),
+        parse_mode: "Markdown",
+        disable_web_page_preview: true,
+      }),
+    });
+    return res.ok;
+  } catch (e) {
+    console.error("Telegram direct failed:", e);
+    return false;
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -56,30 +108,17 @@ export async function POST(req: NextRequest) {
     createdAt: new Date().toISOString(),
   };
 
-  // Console log — visible in `npm run dev` output
-  console.log("📦 Новая заявка EWLG:");
-  console.log(`   ID:      ${application.id}`);
-  console.log(`   Имя:     ${application.name}`);
-  console.log(`   Телефон: ${application.phone}`);
-  if (application.comment) console.log(`   Коммент: ${application.comment}`);
-  console.log(`   Время:   ${application.createdAt}\n`);
+  console.log("📦 Новая заявка EWLG:", JSON.stringify(application));
 
-  // Persist to data/applications.json
-  try {
-    const all = await readAll();
-    all.push(application);
-    await writeAll(all);
-  } catch (e) {
-    console.error("Failed to persist application:", e);
-    // Still return ok — the log is captured
+  // 1) Пробуем переслать боту (он сохранит в БД + уведомит менеджеров)
+  let delivered = await forwardToBot(application);
+  // 2) Если бот не настроен — запасной путь: прямо в Telegram-чат
+  if (!delivered) {
+    delivered = await sendToTelegramDirect(application);
+  }
+  if (!delivered) {
+    console.warn("Заявка не доставлена (ни бот, ни Telegram не настроены). Сохранена в логах.");
   }
 
-  return NextResponse.json({ ok: true, id: application.id });
-}
-
-export async function GET() {
-  // Convenience endpoint to view captured applications during demo.
-  // Remove or protect in production.
-  const all = await readAll();
-  return NextResponse.json({ count: all.length, items: all });
+  return NextResponse.json({ ok: true, id: application.id, delivered });
 }

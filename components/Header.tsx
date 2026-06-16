@@ -48,19 +48,9 @@ export default function Header() {
         <div className={`max-w-8xl mx-auto px-5 md:px-10 flex items-center justify-between transition-all duration-300 ${
           scrolled ? "h-16 md:h-20" : "h-20 md:h-24"
         }`}>
-          <Link href="/" className="flex items-center group">
-            {/*<Image*/}
-            {/*  src="/logo.png"*/}
-            {/*  alt="EWLG · Логистическая компания"*/}
-            {/*  width={180}*/}
-            {/*  height={180}*/}
-            {/*  className={`object-contain transition-all duration-300 ${*/}
-            {/*    scrolled ? "h-12 md:h-14" : "h-14 md:h-20"*/}
-            {/*  } w-auto`}*/}
-            {/*  priority*/}
-            {/*/>*/}
+          <h1><Link href="/" className="flex items-center group">
             EWLG
-          </Link>
+          </Link></h1>
 
           <nav className="hidden lg:flex items-center gap-9">
             {nav.map((item) => (

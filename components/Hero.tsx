@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 const destinations = [
-  { name: "Китай", code: "CN", coords: "23.1°N · 113.3°E" },
-  { name: "ОАЭ", code: "AE", coords: "25.2°N · 55.3°E" },
-  { name: "Казахстан", code: "KZ", coords: "48.0°N · 66.9°E" },
   { name: "Россия", code: "RU", coords: "55.7°N · 37.6°E" },
   { name: "Беларусь", code: "BY", coords: "53.9°N · 27.5°E" },
+  { name: "Казахстан", code: "KZ", coords: "48.0°N · 66.9°E" },
+  { name: "ОАЭ", code: "AE", coords: "25.2°N · 55.3°E" },
+
 ];
 
 const modes = ["Авто", "Авиа", "ЖД", "Море"];
@@ -51,7 +51,7 @@ export default function Hero() {
               <div className="relative h-[1.5em] overflow-hidden inline-flex items-center">
                 <span
                   key={modes[modeIdx]}
-                  className="font-display text-2xl sm:text-3xl md:text-4xl text-ink italic animate-slideUp inline-block leading-none pr-1"
+                  className="font-display text-3xl sm:text-3xl md:text-xl text-ink italic animate-slideUp inline-block leading-none pr-1"
                 >
                   {modes[modeIdx]}
                 </span>
@@ -64,7 +64,7 @@ export default function Hero() {
               <div className="relative h-[1.5em] overflow-hidden inline-flex items-center">
                 <span
                   key={dest.code}
-                  className="font-display text-2xl sm:text-3xl md:text-4xl text-brand-500 italic animate-slideUp inline-block leading-none pr-1"
+                  className="font-display text-3xl sm:text-3xl md:text-3xl text-brand-500 italic animate-slideUp inline-block leading-none pr-1"
                 >
                   {dest.name}
                 </span>
@@ -92,7 +92,7 @@ export default function Hero() {
             </Link>
             <Link
               href="#modes"
-              className="inline-flex items-center justify-between sm:justify-start gap-2 px-6 py-4 sm:px-7 sm:py-4 text-ink border border-ink/15 hover:bg-brand-500 hover:bg-ink hover:text-cream transition-all duration-300"
+              className="group inline-flex items-center justify-between sm:justify-start gap-3 px-6 py-4 sm:px-7 sm:py-4 bg-ink text-cream hover:bg-brand-500 transition-colors duration-300"
             >
               <span>Способы доставки</span>
               <span className="opacity-50">→</span>
@@ -253,7 +253,7 @@ function BannerStrip() {
                 · Активный маршрут ·
               </div>
               <div className="font-display italic text-3xl sm:text-4xl md:text-6xl text-cream tracking-tightest">
-                Гуанчжоу → Москва
+                Китай → Россия
               </div>
             </div>
             <div className="font-mono text-xs text-cream/50 flex flex-col sm:items-end gap-1">
@@ -270,10 +270,10 @@ function BannerStrip() {
 /** Endless ticker with destinations and modes — gives the page motion. */
 function Ticker() {
   const items = [
-    "Китай", "·", "Авто", "·", "ОАЭ", "·", "Авиа", "·",
-    "Казахстан", "·", "ЖД", "·", "Россия", "·", "Море", "·",
-    "Беларусь", "·", "Гуанчжоу", "·", "Дубай", "·", "Алматы", "·",
-    "Москва", "·", "Минск", "·",
+    "Китай", "·", "Гуанчжоу", "·", "Иу", "·", "Шанхай", "·",
+    "Россия", "·", "Москва", "·", "Санкт-Петербург", "·", "Казань", "·",
+    "Беларусь", "·", "Минск", "·", "Брест", "·", "Гомель", "·",
+    "Казахстан", "·", "Алматы", "·", "Астана"
   ];
   return (
     <div className="bg-ink text-cream py-5 md:py-6 border-y border-ink/30 overflow-hidden marquee-mask">

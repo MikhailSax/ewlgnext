@@ -10,6 +10,9 @@ export const metadata: Metadata = {
     description: "Комплексная логистика «под ключ»: перевозки, таможня, склад, ВЭД.",
     type: "website",
   },
+  icons : {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
