@@ -93,7 +93,7 @@ export default function ApplicationForm() {
                 value="EWLGlog@yandex.com"
                 href="mailto:EWLGlog@yandex.com"
               />
-              <ContactLine label="География" value="Гуанчжоу · Dubai · Almaty · Минск" />
+              <ContactLine label="География" value="Гуанчжоу · Москва · Минск · Aлматы · Дубай " />
             </div>
           </ScrollReveal>
 

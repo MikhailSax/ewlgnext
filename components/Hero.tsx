@@ -253,7 +253,7 @@ function BannerStrip() {
                 · Активный маршрут ·
               </div>
               <div className="font-display italic text-3xl sm:text-4xl md:text-6xl text-cream tracking-tightest">
-                Гуанчжоу → Минск
+                Гуанчжоу → Москва
               </div>
             </div>
             <div className="font-mono text-xs text-cream/50 flex flex-col sm:items-end gap-1">
