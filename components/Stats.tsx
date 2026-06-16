@@ -18,7 +18,7 @@ export default function Stats() {
                         </div>
                         <h2 className="font-display text-4xl sm:text-5xl md:text-6xl text-ink leading-[1.02] tracking-tightest">
                             EWLG<br/>
-                            <span className="italic text-brand-500">«доставляем грузы, создаём возможности.».</span>
+                            <span className="italic text-brand-500">доставляем грузы, создаём возможности.</span>
                         </h2>
                         <p className="mt-6 md:mt-8 text-base sm:text-lg text-graphite leading-relaxed max-w-md">
                             EWLG — не маклер с таблицей перевозчиков. Это команда, которая
