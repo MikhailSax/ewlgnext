@@ -155,11 +155,11 @@ export default function Header() {
               <span>KSN990903</span>
             </div>
             <a
-              href="mailto:EWLGlog@yandex.com"
+              href="mailto:EWLGlog@yandex.ru"
               className="flex items-baseline justify-between border-b border-ink/10 pb-3 hover:text-brand-500 transition-colors"
             >
               <span className="font-mono text-[11px] tracking-widest text-ink/40 uppercase">Email</span>
-              <span className="text-right">EWLGlog@yandex.com</span>
+              <span className="text-right">EWLGlog@yandex.ru</span>
             </a>
             <div className="text-ink/50 pt-2">Гуанчжоу · Dubai · Almaty · Минск</div>
           </div>

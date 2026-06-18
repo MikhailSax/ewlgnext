@@ -5,7 +5,7 @@ import { services } from "@/lib/services";
 
 export default function Modes() {
   return (
-    <section id="modes" className="py-20 md:py-32 bg-ink text-cream relative overflow-hidden">
+      <section id="modes" className="pt-20 md:pt-32 pb-[3.75rem] md:pb-24 bg-ink text-cream relative overflow-hidden">
       {/* grid lines */}
       <div
         className="absolute inset-0 opacity-[0.04] pointer-events-none"
