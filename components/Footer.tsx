@@ -62,7 +62,7 @@ export default function Footer() {
                 </a>
               </li>
               <li className="inline-flex items-center gap-2">
-                <span className="font-mono text-[10px] text-brand-400">WeChat</span>
+                <span className="font-mono text-[10px] text-brand-400"><a href="/wechat">WeChat</a></span>
                 KSN990903
               </li>
               <li>
