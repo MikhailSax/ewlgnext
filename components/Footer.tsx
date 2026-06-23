@@ -66,8 +66,8 @@ export default function Footer() {
                 KSN990903
               </li>
               <li>
-                <a href="mailto:EWLGlog@yandex.ru" className="hover:text-cream transition-colors break-all">
-                  EWLGlog@yandex.ru
+                <a href="mailto:EWLGlog@yandex.com" className="hover:text-cream transition-colors break-all">
+                  EWLGlog@yandex.com
                 </a>
               </li>
               <li className="pt-2 text-cream/40">Москва · Минск · Алматы · Дубай</li>

@@ -66,10 +66,10 @@ export default function Header() {
 
           <div className="flex items-center gap-2 md:gap-3">
             <a
-              href="https://t.me/ewlg_bot"
+              href="https://t.me/ewlgroupchat_bot"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Telegram @ewlg_bot"
+              aria-label="Telegram @ewlgroupchat_bot"
               className="hidden sm:inline-flex w-10 h-10 items-center justify-center text-ink/70 hover:text-brand-500 transition-colors"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -148,18 +148,18 @@ export default function Header() {
               className="flex items-baseline justify-between border-b border-ink/10 pb-3 hover:text-brand-500 transition-colors"
             >
               <span className="font-mono text-[11px] tracking-widest text-ink/40 uppercase">Telegram</span>
-              <span>@ewlg_bot</span>
+              <span>@ewlgroupchat_bot</span>
             </a>
             <div className="flex items-baseline justify-between border-b border-ink/10 pb-3">
               <span className="font-mono text-[11px] tracking-widest text-ink/40 uppercase">WeChat</span>
               <span>KSN990903</span>
             </div>
             <a
-              href="mailto:EWLGlog@yandex.ru"
+              href="mailto:EWLGlog@yandex.com"
               className="flex items-baseline justify-between border-b border-ink/10 pb-3 hover:text-brand-500 transition-colors"
             >
               <span className="font-mono text-[11px] tracking-widest text-ink/40 uppercase">Email</span>
-              <span className="text-right">EWLGlog@yandex.ru</span>
+              <span className="text-right">EWLGlog@yandex.com</span>
             </a>
             <div className="text-ink/50 pt-2">Гуанчжоу · Dubai · Almaty · Минск</div>
           </div>

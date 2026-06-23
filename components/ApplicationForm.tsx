@@ -84,8 +84,8 @@ export default function ApplicationForm() {
                         <div className="mt-10 md:mt-12 space-y-4 md:space-y-5 border-t border-ink/10 pt-6 md:pt-8">
                             <ContactLine
                                 label="Telegram"
-                                value="@ewlg_bot"
-                                href="https://t.me/ewlg_bot"
+                                value="@ewlgroupchat_bot"
+                                href="https://t.me/ewlgroupchat_bot"
                                 external
                             />
                             <ContactLine
@@ -94,8 +94,8 @@ export default function ApplicationForm() {
                             />
                             <ContactLine
                                 label="Email"
-                                value="EWLGlog@yandex.ru"
-                                href="mailto:EWLGlog@yandex.ru"
+                                value="EWLGlog@yandex.com"
+                                href="mailto:EWLGlog@yandex.com"
                             />
                             <ContactLine label="География" value="Гуанчжоу · Москва · Минск · Aлматы · Дубай "/>
                         </div>

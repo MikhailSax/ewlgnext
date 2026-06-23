@@ -172,97 +172,103 @@ function ManifestCard({ activeIdx }: { activeIdx: number }) {
  * Drop a real photograph in here later: replace the SVG with <Image src="/banner.jpg" .../>.
  */
 function BannerStrip() {
+  const waypoints = [
+    { x: 190,  y: 210 , country: "Китай",     code: "CAN" },
+    { x: 600,  y: 200, country: "Казахстан", code: "ALA" },
+    { x: 1040, y: 205, country: "Россия",    code: "MOW" },
+    { x: 1430, y: 110, country: "Беларусь",  code: "MSQ" },
+  ];
+
   return (
-    <div className="relative h-[260px] sm:h-[340px] md:h-[420px] bg-ink overflow-hidden">
-      {/* Animated grid background */}
-      <div
-        className="absolute inset-0 opacity-[0.07]"
-        style={{
-          backgroundImage:
-            "linear-gradient(#F5F2EC 1px, transparent 1px), linear-gradient(90deg, #F5F2EC 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-        }}
-      />
-
-      {/* Abstract route SVG */}
-      <svg
-        className="absolute inset-0 w-full h-full"
-        viewBox="0 0 1600 420"
-        preserveAspectRatio="xMidYMid slice"
-        aria-hidden
-      >
-        <defs>
-          <linearGradient id="brandFade" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="#167E47" stopOpacity="0" />
-            <stop offset="0.5" stopColor="#167E47" stopOpacity="1" />
-            <stop offset="1" stopColor="#167E47" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-
-        {/* Long curved route */}
-        <path
-          d="M -50 320 Q 300 100 600 200 T 1200 140 T 1700 80"
-          stroke="#F5F2EC"
-          strokeOpacity="0.25"
-          strokeWidth="1.5"
-          strokeDasharray="6 10"
-          fill="none"
-          className="animate-drawPath"
-          style={{ strokeDasharray: "1000", strokeDashoffset: "1000" }}
-        />
-        <path
-          d="M -50 320 Q 300 100 600 200 T 1200 140 T 1700 80"
-          stroke="url(#brandFade)"
-          strokeWidth="2"
-          fill="none"
+      <div className="relative h-[260px] sm:h-[340px] md:h-[420px] bg-ink overflow-hidden">
+        {/* Animated grid background */}
+        <div
+            className="absolute inset-0 opacity-[0.07]"
+            style={{
+              backgroundImage:
+                  "linear-gradient(#F5F2EC 1px, transparent 1px), linear-gradient(90deg, #F5F2EC 1px, transparent 1px)",
+              backgroundSize: "60px 60px",
+            }}
         />
 
-        {/* Waypoints */}
-        {[
-          { x: 160, y: 230, label: "CAN" },
-          { x: 460, y: 195, label: "DXB" },
-          { x: 800, y: 200, label: "ALA" },
-          { x: 1140, y: 160, label: "MOW" },
-          { x: 1440, y: 105, label: "MSQ" },
-        ].map((p, i) => (
-          <g key={p.label} style={{ animation: `fadeIn 0.6s ease-out ${0.4 + i * 0.2}s forwards`, opacity: 0 }}>
-            <circle cx={p.x} cy={p.y} r="20" fill="#0A0A0A" stroke="#167E47" strokeWidth="1.5" />
-            <circle cx={p.x} cy={p.y} r="4" fill="#167E47" />
-            <text
-              x={p.x}
-              y={p.y - 32}
-              textAnchor="middle"
-              fill="#F5F2EC"
-              fontSize="11"
-              fontFamily="JetBrains Mono, monospace"
-              letterSpacing="2"
-            >
-              {p.label}
-            </text>
-          </g>
-        ))}
-      </svg>
+        {/* Abstract route SVG */}
+        <svg
+            className="absolute inset-0 w-full h-full"
+            viewBox="0 0 1600 420"
+            preserveAspectRatio="xMidYMid slice"
+            aria-hidden
+        >
+          <defs>
+            <linearGradient id="brandFade" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stopColor="#167E47" stopOpacity="0" />
+              <stop offset="0.5" stopColor="#167E47" stopOpacity="1" />
+              <stop offset="1" stopColor="#167E47" stopOpacity="0" />
+            </linearGradient>
+          </defs>
 
-      {/* Text overlay */}
-      <div className="absolute inset-0 flex items-end">
-        <div className="max-w-8xl mx-auto w-full px-5 md:px-10 pb-8 md:pb-12">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+          {/* Long curved route */}
+          <path
+              d="M -50 320 Q 300 100 600 200 T 1200 140 T 1700 80"
+              stroke="#F5F2EC"
+              strokeOpacity="0.25"
+              strokeWidth="1.5"
+              strokeDasharray="6 10"
+              fill="none"
+              className="animate-drawPath"
+              style={{ strokeDasharray: "1000", strokeDashoffset: "1000" }}
+          />
+          <path
+              d="M -50 320 Q 300 100 600 200 T 1200 140 T 1700 80"
+              stroke="url(#brandFade)"
+              strokeWidth="2"
+              fill="none"
+          />
+
+          {/* Waypoints */}
+          {waypoints.map((p, i) => (
+              <g key={p.code} style={{ animation: `fadeIn 0.6s ease-out ${0.4 + i * 0.2}s forwards`, opacity: 0 }}>
+                <circle cx={p.x} cy={p.y} r="20" fill="#0A0A0A" stroke="#167E47" strokeWidth="1.5" />
+                <circle cx={p.x} cy={p.y} r="4" fill="#167E47" />
+                <text
+                    x={p.x}
+                    y={p.y - 46}
+                    textAnchor="middle"
+                    fill="#F5F2EC"
+                    fontSize="17"
+                    fontFamily="Manrope, sans-serif"
+                    fontWeight="600"
+                >
+                  {p.country}
+                </text>
+                <text
+                    x={p.x}
+                    y={p.y - 30}
+                    textAnchor="middle"
+                    fill="#5BB783"
+                    fontSize="10"
+                    fontFamily="JetBrains Mono, monospace"
+                    letterSpacing="2"
+                >
+                  {p.code}
+                </text>
+              </g>
+          ))}
+        </svg>
+
+        {/* Text overlay */}
+        <div className="absolute inset-0 flex items-end">
+          <div className="max-w-8xl mx-auto w-full px-5 md:px-10 pb-8 md:pb-12">
             <div>
               <div className="font-mono text-[10px] sm:text-xs tracking-[0.2em] text-brand-300 uppercase mb-3">
                 · Активный маршрут ·
               </div>
               <div className="font-display italic text-3xl sm:text-4xl md:text-6xl text-cream tracking-tightest">
-                Китай → Россия
+                Китай → СНГ
               </div>
-            </div>
-            <div className="font-mono text-xs text-cream/50 flex flex-col sm:items-end gap-1">
-              <span>Контейнер MSC-2241</span>
-              <span>ETA · 16 дней</span>
             </div>
           </div>
         </div>
       </div>
-    </div>
   );
 }
 
