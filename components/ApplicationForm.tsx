@@ -1,17 +1,68 @@
 "use client";
 
-import {useState, FormEvent} from "react";
+import {useState, useEffect, useRef, FormEvent} from "react";
+import Script from "next/script";
 import ScrollReveal from "./ScrollReveal";
 
 type Status = "idle" | "loading" | "success" | "error";
+
+// Капча включается автоматически, если задан публичный ключ Turnstile.
+// Нет ключа (например, локально) — форма работает как раньше, без капчи.
+const CAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+const CAPTCHA_ENABLED = !!CAPTCHA_SITE_KEY;
 
 export default function ApplicationForm() {
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
     const [comment, setComment] = useState("");
     const [consent, setConsent] = useState(false);
+    const [captchaToken, setCaptchaToken] = useState("");
     const [status, setStatus] = useState<Status>("idle");
     const [errorMsg, setErrorMsg] = useState("");
+
+    const turnstileRef = useRef<HTMLDivElement | null>(null);
+    const widgetIdRef = useRef<string | null>(null);
+
+    // Рендер виджета капчи (явный, чтобы корректно переотрисовывался)
+    useEffect(() => {
+        if (!CAPTCHA_ENABLED) return;
+        if (status === "success") {
+            // виджет размонтирован вместе с формой — отрисуем заново при возврате
+            widgetIdRef.current = null;
+            return;
+        }
+        const tryRender = () => {
+            const ts = (window as any).turnstile;
+            if (!ts || !turnstileRef.current) return false;
+            if (widgetIdRef.current !== null) return true; // уже отрисован
+            widgetIdRef.current = ts.render(turnstileRef.current, {
+                sitekey: CAPTCHA_SITE_KEY,
+                theme: "dark",
+                callback: (token: string) => setCaptchaToken(token),
+                "expired-callback": () => setCaptchaToken(""),
+                "error-callback": () => setCaptchaToken(""),
+            });
+            return true;
+        };
+        if (tryRender()) return;
+        // скрипт мог ещё не загрузиться — подождём
+        const t = setInterval(() => {
+            if (tryRender()) clearInterval(t);
+        }, 300);
+        return () => clearInterval(t);
+    }, [status]);
+
+    const resetCaptcha = () => {
+        setCaptchaToken("");
+        const ts = (window as any).turnstile;
+        if (ts && widgetIdRef.current) {
+            try {
+                ts.reset(widgetIdRef.current);
+            } catch {
+                /* ignore */
+            }
+        }
+    };
 
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const cleaned = e.target.value.replace(/[^\d+\s()\-]/g, "");
@@ -23,6 +74,7 @@ export default function ApplicationForm() {
         const digits = phone.replace(/\D/g, "");
         if (digits.length < 7) return "Проверьте номер телефона";
         if (!consent) return "Подтвердите согласие на обработку персональных данных";
+        if (CAPTCHA_ENABLED && !captchaToken) return "Подтвердите, что вы не робот";
         return null;
     };
 
@@ -42,7 +94,12 @@ export default function ApplicationForm() {
             const res = await fetch("/api/application", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({name: name.trim(), phone: phone.trim(), comment: comment.trim()}),
+                body: JSON.stringify({
+                    name: name.trim(),
+                    phone: phone.trim(),
+                    comment: comment.trim(),
+                    captchaToken,
+                }),
             });
 
             if (!res.ok) throw new Error("Не удалось отправить заявку");
@@ -52,14 +109,24 @@ export default function ApplicationForm() {
             setPhone("");
             setComment("");
             setConsent(false);
+            setCaptchaToken("");
         } catch (e) {
             setStatus("error");
             setErrorMsg("Что-то пошло не так. Попробуйте ещё раз или позвоните нам.");
+            resetCaptcha(); // токен капчи одноразовый — обновляем для повторной отправки
         }
     };
 
     return (
         <section id="contact" className="py-20 md:py-32 bg-cream border-t border-ink/8 relative overflow-hidden">
+            {/* Скрипт капчи подключаем только когда задан ключ */}
+            {CAPTCHA_ENABLED && (
+                <Script
+                    src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+                    strategy="afterInteractive"
+                />
+            )}
+
             {/* Background type flourish */}
             <div
                 className="absolute -bottom-10 sm:-bottom-20 -right-5 sm:-right-10 font-display text-[10rem] sm:text-[16rem] md:text-[22rem] leading-none text-ink/[0.025] select-none pointer-events-none tracking-tightest">
@@ -84,13 +151,14 @@ export default function ApplicationForm() {
                         <div className="mt-10 md:mt-12 space-y-4 md:space-y-5 border-t border-ink/10 pt-6 md:pt-8">
                             <ContactLine
                                 label="Telegram"
-                                value="@ewlgroupchat_bot"
-                                href="https://t.me/ewlgroupchat_bot"
+                                value="@ewlg_bot"
+                                href="https://t.me/ewlg_bot"
                                 external
                             />
                             <ContactLine
                                 label="WeChat"
                                 value="KSN990903"
+                                href="/wechat"
                             />
                             <ContactLine
                                 label="Email"
@@ -116,99 +184,103 @@ export default function ApplicationForm() {
                                 <SuccessState onReset={() => setStatus("idle")}/>
                             ) : (
                                 <>
-                                <div
-                                    className="font-mono text-[10px] tracking-widest text-brand-400 uppercase mb-6 md:mb-8">
-                                    Новая заявка
-                                </div>
-
-                                <div className="space-y-6 md:space-y-7">
-                                    <Field
-                                        label="Имя"
-                                        hint="01"
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        placeholder="Как к вам обращаться"
-                                        autoComplete="name"
-                                        inputMode="text"
-                                        required
-                                    />
-
-                                    <Field
-                                        label="Телефон"
-                                        hint="02"
-                                        type="tel"
-                                        value={phone}
-                                        onChange={handlePhoneChange}
-                                        placeholder="+7(938)-722-42-22"
-                                        autoComplete="tel"
-                                        inputMode="tel"
-                                        required
-                                    />
-
-                                    <Field
-                                        label="Комментарий"
-                                        hint="03"
-                                        as="textarea"
-                                        value={comment}
-                                        onChange={(e) => setComment(e.target.value)}
-                                        placeholder="Что везём, откуда и куда — пара строк"
-                                    />
-                                </div>
-
-                                {status === "error" && errorMsg && (
                                     <div
-                                        className="mt-5 md:mt-6 px-4 py-3 border-l-2 border-brand-400 text-sm text-cream/90 bg-cream/[0.04] animate-fadeIn">
-                                        {errorMsg}
+                                        className="font-mono text-[10px] tracking-widest text-brand-400 uppercase mb-6 md:mb-8">
+                                        Новая заявка
                                     </div>
-                                )}
 
-                                <div className="mt-8 md:mt-10 flex items-start gap-3">
-                                    <input
-                                        id="consent"
-                                        type="checkbox"
-                                        checked={consent}
-                                        onChange={(e) => setConsent(e.target.checked)}
-                                        required
-                                        className="mt-0.5 h-4 w-4 shrink-0 accent-brand-500 cursor-pointer"
-                                    />
-                                    <span className="text-xs text-cream/60 leading-relaxed">
+                                    <div className="space-y-6 md:space-y-7">
+                                        <Field
+                                            label="Имя"
+                                            hint="01"
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
+                                            placeholder="Как к вам обращаться"
+                                            autoComplete="name"
+                                            inputMode="text"
+                                            required
+                                        />
+
+                                        <Field
+                                            label="Телефон"
+                                            hint="02"
+                                            type="tel"
+                                            value={phone}
+                                            onChange={handlePhoneChange}
+                                            placeholder="+7(938)-722-42-22"
+                                            autoComplete="tel"
+                                            inputMode="tel"
+                                            required
+                                        />
+
+                                        <Field
+                                            label="Комментарий"
+                                            hint="03"
+                                            as="textarea"
+                                            value={comment}
+                                            onChange={(e) => setComment(e.target.value)}
+                                            placeholder="Что везём, откуда и куда — пара строк"
+                                        />
+                                    </div>
+
+                                    {status === "error" && errorMsg && (
+                                        <div
+                                            className="mt-5 md:mt-6 px-4 py-3 border-l-2 border-brand-400 text-sm text-cream/90 bg-cream/[0.04] animate-fadeIn">
+                                            {errorMsg}
+                                        </div>
+                                    )}
+
+                                    {/* Капча */}
+                                    {CAPTCHA_ENABLED && <div ref={turnstileRef} className="mt-6"/>}
+
+                                    {/* Согласие */}
+                                    <div className="mt-8 md:mt-10 flex items-start gap-3">
+                                        <input
+                                            id="consent"
+                                            type="checkbox"
+                                            checked={consent}
+                                            onChange={(e) => setConsent(e.target.checked)}
+                                            required
+                                            className="mt-0.5 h-4 w-4 shrink-0 accent-brand-500 cursor-pointer"
+                                        />
+                                        <span className="text-xs text-cream/60 leading-relaxed">
                       <label htmlFor="consent" className="cursor-pointer hover:text-cream/80 transition-colors">
                         Я соглашаюсь с
                       </label>{" "}
-
-                                    <span
-                        rel="noopener noreferrer"
-                        className="text-cream/90 underline underline-offset-2 decoration-brand-400 hover:text-cream"
-                      >
+                                            <a
+                                                href="/privacy"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-cream/90 underline underline-offset-2 decoration-brand-400 hover:text-cream"
+                                            >
                         политикой конфиденциальности
-                      </span>{" "}
-                                    <label htmlFor="consent"
-                                           className="cursor-pointer hover:text-cream/80 transition-colors">
-                                        и даю согласие на обработку персональных данных. Контакты
-                                        третьим лицам не передаём.
-                                    </label>
-                                </span>
-                                </div>
+                      </a>{" "}
+                                            <label htmlFor="consent"
+                                                   className="cursor-pointer hover:text-cream/80 transition-colors">
+                        и даю согласие на обработку персональных данных. Контакты
+                        третьим лицам не передаём.
+                      </label>
+                    </span>
+                                    </div>
 
-                                <button
-                                type="submit"
-                                disabled={status === "loading"}
-                            className="group mt-6 w-full inline-flex items-center justify-between px-5 sm:px-6 py-4 sm:py-5 bg-brand-500 hover:bg-brand-600 disabled:bg-brand-500/60 text-cream transition-colors duration-300"
-                        >
+                                    <button
+                                        type="submit"
+                                        disabled={status === "loading"}
+                                        className="group mt-6 w-full inline-flex items-center justify-between px-5 sm:px-6 py-4 sm:py-5 bg-brand-500 hover:bg-brand-600 disabled:bg-brand-500/60 text-cream transition-colors duration-300"
+                                    >
                     <span className="font-mono text-xs tracking-widest uppercase">
                       {status === "loading" ? "Отправляем…" : "Отправить заявку"}
                     </span>
-                            <span className="transition-transform group-hover:translate-x-1.5">→</span>
-                        </button>
-                    </>
-                    )}
-                </form>
-            </ScrollReveal>
-        </div>
-</div>
-</section>
-)
-    ;
+                                        <span className="transition-transform group-hover:translate-x-1.5">→</span>
+                                    </button>
+                                </>
+                            )}
+                        </form>
+                    </ScrollReveal>
+                </div>
+            </div>
+        </section>
+    );
 }
 
 type FieldCommon = { label: string; hint: string };

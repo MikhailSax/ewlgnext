@@ -1,5 +1,5 @@
 import {NextRequest, NextResponse} from "next/server";
-import nodemailer from "nodemailer"
+import nodemailer from "nodemailer";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,12 +12,36 @@ type Application = {
     createdAt: string;
 };
 
+/** Проверка капчи Cloudflare Turnstile. */
+async function verifyCaptcha(token: string, ip: string): Promise<boolean> {
+    const secret = process.env.TURNSTILE_SECRET_KEY;
+    // Если секрет не задан — капча отключена (например, локально). Прод: задайте ключ.
+    if (!secret) {
+        console.warn("TURNSTILE_SECRET_KEY не задан — проверка капчи пропущена");
+        return true;
+    }
+    try {
+        const res = await fetch(
+            "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+            {
+                method: "POST",
+                headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                body: new URLSearchParams({secret, response: token, remoteip: ip}),
+            }
+        );
+        const data = await res.json();
+        return data.success === true;
+    } catch (e) {
+        console.error("Captcha verify failed:", e);
+        return false;
+    }
+}
+
 /** Отправка письма на почту через SMTP Яндекса. */
 async function sendEmail(app: Application): Promise<{ ok: boolean; error?: string }> {
     const host = process.env.SMTP_HOST || "smtp.yandex.ru";
     const port = Number(process.env.SMTP_PORT || "465");
     const user = process.env.SMTP_USER;
-    console.log(user);
     const pass = process.env.SMTP_PASS;
     const to = process.env.MAIL_TO || user;
 
@@ -70,17 +94,16 @@ async function sendEmail(app: Application): Promise<{ ok: boolean; error?: strin
 
 /*
  * ─── ОТПРАВКА БОТУ (отключена) ────────────────────────────────────────────
- * Бот сейчас на локальном ПК — Vercel до него не достучится, поэтому пуш
- * выключен. Когда вынесешь бота на сервер с постоянным адресом:
+ * Бот сейчас на локальном ПК — Vercel до него не достучится. Когда бот
+ * переедет на сервер с постоянным адресом:
  *   1) задай BOT_ENDPOINT_URL и BOT_API_KEY в переменных окружения Vercel;
- *   2) раскомментируй функцию ниже и строку с её вызовом в POST.
+ *   2) раскомментируй функцию ниже и строки с её вызовом в POST.
  *
  * const BOT_TIMEOUT_MS = 8000;
  *
  * async function forwardToBot(app: Application): Promise<{ ok: boolean; error?: string }> {
  *   const url = process.env.BOT_ENDPOINT_URL;
  *   if (!url) return { ok: false, error: "BOT_ENDPOINT_URL не задан" };
- *
  *   const controller = new AbortController();
  *   const timer = setTimeout(() => controller.abort(), BOT_TIMEOUT_MS);
  *   try {
@@ -93,15 +116,10 @@ async function sendEmail(app: Application): Promise<{ ok: boolean; error?: strin
  *       body: JSON.stringify({ name: app.name, phone: app.phone, comment: app.comment }),
  *       signal: controller.signal,
  *     });
- *     if (!res.ok) {
- *       console.error("Bot endpoint error:", res.status, await res.text().catch(() => ""));
- *       return { ok: false, error: `Бот ответил ${res.status}` };
- *     }
+ *     if (!res.ok) return { ok: false, error: `Бот ответил ${res.status}` };
  *     return { ok: true };
  *   } catch (e) {
- *     const msg = e instanceof Error && e.name === "AbortError" ? "таймаут запроса к боту" : String(e);
- *     console.error("Bot endpoint request failed:", msg);
- *     return { ok: false, error: msg };
+ *     return { ok: false, error: String(e) };
  *   } finally {
  *     clearTimeout(timer);
  *   }
@@ -110,13 +128,22 @@ async function sendEmail(app: Application): Promise<{ ok: boolean; error?: strin
  */
 
 export async function POST(req: NextRequest) {
-    let body: { name?: string; phone?: string; comment?: string };
+    let body: { name?: string; phone?: string; comment?: string; captchaToken?: string };
     try {
         body = await req.json();
     } catch {
         return NextResponse.json({ok: false, error: "Invalid JSON"}, {status: 400});
     }
 
+    // 1) Капча
+    const captchaToken = (body.captchaToken || "").toString();
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "";
+    const captchaOk = await verifyCaptcha(captchaToken, ip);
+    if (!captchaOk) {
+        return NextResponse.json({ok: false, error: "Captcha failed"}, {status: 400});
+    }
+
+    // 2) Валидация
     const name = (body.name || "").toString().trim().slice(0, 120);
     const phone = (body.phone || "").toString().trim().slice(0, 40);
     const comment = (body.comment || "").toString().trim().slice(0, 2000);
@@ -138,7 +165,7 @@ export async function POST(req: NextRequest) {
 
     console.log("Новая заявка EWLG:", JSON.stringify(application));
 
-    // Сейчас доставка только на почту
+    // 3) Доставка (сейчас только на почту)
     const mail = await sendEmail(application);
     if (!mail.ok) console.warn("На почту не доставлено:", mail.error);
 
