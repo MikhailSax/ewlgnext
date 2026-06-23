@@ -110,7 +110,7 @@ function RouteCard({
                             {name}
                         </h3>
                         <div className="text-xs sm:text-sm text-ink/50 mb-5 font-mono">
-                            {title} · транзит {transit}
+
                         </div>
                     </div>
 
@@ -144,9 +144,7 @@ function RouteCard({
                 <div className="font-mono text-xs tracking-widest text-ink/40">
                     0{index + 1} / {code}
                 </div>
-                <div className="font-mono text-xs tracking-widest text-brand-500 uppercase">
-                    транзит {transit}
-                </div>
+
             </div>
 
             <h3 className="font-display text-4xl sm:text-5xl md:text-6xl text-ink leading-[1.02] tracking-tightest mb-2 group-hover:text-brand-500 transition-colors duration-500">

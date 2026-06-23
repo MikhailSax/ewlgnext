@@ -5,7 +5,7 @@ import { services } from "@/lib/services";
 
 export default function Modes() {
   return (
-      <section id="modes" className="pt-20 md:pt-32 pb-[3.75rem] md:pb-24 bg-ink text-cream relative overflow-hidden">
+      <section id="modes" className="pt-20 md:pt-32 pb-12 md:pb-16 bg-ink text-cream relative overflow-hidden">
       {/* grid lines */}
       <div
         className="absolute inset-0 opacity-[0.04] pointer-events-none"
@@ -33,7 +33,7 @@ export default function Modes() {
         </ScrollReveal>
 
         <ScrollReveal variant="stagger" className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 md:gap-x-10 gap-y-10 md:gap-y-14">
-          {services.map((m) => (
+          {services.slice(0, 6).map((m) => (
             <Link
               key={m.slug}
               href={`/services/${m.slug}`}
